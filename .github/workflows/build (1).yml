@@ -1,0 +1,27 @@
+name: Build BAKAL OCR APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    container:
+      image: kivy/buildozer:latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Create spec
+      run: |
+        printf '[app]\ntitle = BAKAL OCR\npackage.name = bakalocr\npackage.domain = com.bakal\nsource.dir = .\nsource.include_exts = py,png,jpg,kv,atlas\nversion = 2.0\nrequirements = python3,kivy==2.3.0,pillow,plyer,numpy,opencv-python-headless,pytesseract\norientation = portrait\nandroid.permissions = CAMERA,READ_EXTERNAL_STORAGE,WRITE_EXTERNAL_STORAGE,INTERNET\nandroid.api = 33\nandroid.minapi = 21\nandroid.ndk = 25b\nandroid.archs = arm64-v8a\nfullscreen = 0\n\n[buildozer]\nlog_level = 2\nwarn_on_root = 1\n' > buildozer.spec
+
+    - name: Build APK
+      run: buildozer android debug
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: BAKAL-OCR-APK
+        path: bin/*.apk
